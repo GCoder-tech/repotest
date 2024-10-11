@@ -1,5 +1,5 @@
 name: "Create Repository"
-description: "Use this issue to request a new GitHub Product repository"
+description: "Use this issue to request a new GitHub Repository"
 title: "Repository creation request"
 labels: ["repo-creation"]
 body:
@@ -22,8 +22,12 @@ body:
   attributes:
     label: BUC Code
     options:
-      - 100
-      - 200
+      - 1001.510050.9976
+      - 1001.510050.9326
+      - 3002.510050.9722
+      - 1001.510050.9775
+      - 1001.510050.9770
+      - 3801.510050.9975
   validations:
     required: true
 - type: input
