@@ -8,7 +8,7 @@ body:
     value: |
       This should read: "Please enter the Solution Asset ID associated with your team's [GitHub Product Code](https://wiki.fisglobal.com/display/cmtech/GHE+-+Team+Onboarding#GHETeamOnboarding-GitHubProductCode) and the name, description, BUC code to create a repository."
 - type: dropdown
-  id: alue stream key
+  id: value stream key
   attributes:
     label: Value Stream Key
     multiple: false
