@@ -21,6 +21,6 @@ jobs:
            -X POST \
            -H "Authorization: token $GITHUB_TOKEN" \
            -H "Accept: application/vnd.github.v3+json" \
-https://api.github.com/orgs/<your-org>/repos
+https://api.github.com/orgs/GCoder-tech/repos
 \
            -d '{"name": "${{ steps.extract.outputs.repo_name }}", "description": "${{ steps.extract.outputs.repo_description }}", "private": $([[ "${{ steps.extract.outputs.repo_visibility }}" == "private" ]] && echo true || echo false)}'
