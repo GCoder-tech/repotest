@@ -17,10 +17,10 @@ body:
     required: true
 - type: dropdown
   attributes:
-    label: Favorite dessert
+    label: value stream key
     options:
-      - ice cream
-      - pie
+      - dee
+      - drcb
 - type: input
   id: buc
   attributes:
