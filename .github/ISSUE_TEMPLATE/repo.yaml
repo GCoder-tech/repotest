@@ -7,18 +7,6 @@ body:
   attributes:
     value: |
       This should read: "Please enter the Solution Asset ID associated with your team's [GitHub Product Code](https://wiki.fisglobal.com/display/cmtech/GHE+-+Team+Onboarding#GHETeamOnboarding-GitHubProductCode) and the name, description, BUC code to create a repository."
-- type: dropdown
-  id: Value Stream Key
-  attributes:
-    label: Value Stream Key
-    multiple: false
-    description: Please select the Value Stream Key **(default is DEE)**
-    default: 0
-    options:
-      - "DEE"
-      - "DRCB"
-  validations:
-    required: true
 - type: input
   id: asset-id
   attributes:
@@ -41,6 +29,18 @@ body:
     label: Repository Name
     description: Enter the name of the repository(max 60 chars and no special characters) **(mandatory)**
     placeholder: ex. ui
+  validations:
+    required: true
+- type: dropdown
+  id: visibility
+  attributes:
+    label: Visibility
+    multiple: false
+    description: Please select the visibility **(default is private)**
+    default: 0
+    options:
+      - private
+      - internal
   validations:
     required: true
 - type: textarea
