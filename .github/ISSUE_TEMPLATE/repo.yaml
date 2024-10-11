@@ -21,6 +21,7 @@ body:
   id: buc
   attributes:
     label: BUC Code
+    default: 0
     options:
       - 1001.510050.9976
       - 1001.510050.9326
