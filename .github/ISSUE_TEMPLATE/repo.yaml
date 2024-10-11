@@ -15,8 +15,8 @@ body:
     description: Please select the Value Stream Key **(default is DEE)**
     default: 0
     options:
-      - DEE
-      - DRCB
+      - "DEE"
+      - "DRCB"
   validations:
     required: true
 - type: input
