@@ -19,8 +19,9 @@ body:
   attributes:
     label: value stream key
     options:
-      - dee
-      - drcb
+      - DEE
+      - DRCB
+      - DLFI
 - type: input
   id: buc
   attributes:
