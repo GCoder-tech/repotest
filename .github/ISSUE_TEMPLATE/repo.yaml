@@ -50,14 +50,6 @@ body:
       - internal
   validations:
     required: true
-- type: input
-  id: asset-id
-  attributes:
-    label: Asset ID 
-    description: Enter the asset id of the Product **(mandatory)**
-    placeholder: "12226"
-  validations:
-    required: true
 - type: textarea
   id: repo-description
   attributes:
