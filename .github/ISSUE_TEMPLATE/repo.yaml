@@ -17,20 +17,21 @@ body:
       - DBTVS
       - BPS 
       - DBUS
+- type: dropdown
+  id: buc
+  attributes:
+    label: BUC Code
+    options:
+      - 100
+      - 200
+  validations:
+    required: true
 - type: input
   id: repo-name
   attributes:
     label: Repository Name
     description: Enter the name of the repository(max 60 chars and no special characters) **(mandatory)**
     placeholder: ex. ui
-  validations:
-    required: true
-- type: input
-  id: buc
-  attributes:
-    label: BUC Code
-    description: Enter the BUC code **(mandatory)**
-    placeholder: "xxxx.xxxx.xxxx"
   validations:
     required: true
 - type: dropdown
