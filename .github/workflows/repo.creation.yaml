@@ -19,7 +19,7 @@ jobs:
        run: |
          curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
           -d '{
-            "name": "${{ github.event.inputs.repoName }}",
-            "description": "${{ github.event.inputs.repoDescription }}",
-            "private": ${{ github.event.inputs.visibility == 'private' ? 'true' : 'false' }}
+            "name": "test-workflow",
+            "description": "test creation of repo through work-flow",
+            "private": 'true'
           }' https://api.github.com/user/repos
