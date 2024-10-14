@@ -15,5 +15,5 @@ let selectedValue = '';
 if (selectedKey && data[selectedKey]) {
     selectedValue = data[selectedKey];
 }
-
+console.log(selectedValue);
 process.env.buc-dd = selectedValue;
