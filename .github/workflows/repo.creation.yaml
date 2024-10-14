@@ -20,7 +20,5 @@ jobs:
          curl \
            -X POST \
            -H "Authorization: token $GITHUB_TOKEN" \
-           -H "Accept: application/vnd.github.v3+json" \
-https://github.com/GCoder-tech/repotest
-\
+           -H "Accept: application/vnd.github.v3+json" \ https://github.com/GCoder-tech/repotest \
            -d '{"name": "${{ steps.extract.outputs.repo_name }}", "description": "${{ steps.extract.outputs.repo_description }}", "private": $([[ "${{ steps.extract.outputs.repo_visibility }}" == "private" ]] && echo true || echo false)}'
