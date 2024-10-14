@@ -17,8 +17,9 @@ jobs:
        env:
          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
        run: |
-         curl \
-           -X POST \
-           -H "Authorization: token $GITHUB_TOKEN" \
-           -H "Accept: application/vnd.github.v3+json" \ https://github.com/GCoder-tech/repotest \
-           -d '{"name": "${{ steps.extract.outputs.repo_name }}", "description": "${{ steps.extract.outputs.repo_description }}", "private": $([[ "${{ steps.extract.outputs.repo_visibility }}" == "private" ]] && echo true || echo false)}'
+         curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
+          -d '{
+            "name": "${{ github.event.inputs.repoName }}",
+            "description": "${{ github.event.inputs.repoDescription }}",
+            "private": ${{ github.event.inputs.visibility == 'private' ? 'true' : 'false' }}
+          }' https://api.github.com/user/repos
