@@ -13,7 +13,7 @@ jobs:
          echo "::set-output name=repo_name::$(echo '${{ github.event.issue.body }}' | grep 'Repository Name' | cut -d':' -f2 | xargs)"
          echo "::set-output name=repo_description::$(echo '${{ github.event.issue.body }}' | grep 'Repository Description' | cut -d':' -f2 | xargs)"
          echo "::set-output name=repo_visibility::$(echo '${{ github.event.issue.body }}' | grep 'Repository Visibility' | cut -d':' -f2 | xargs | tr '[:upper:]' '[:lower:]')"
-         echo "${{ secrets.CREATE_REPO_SECRET }}"
+         echo ${{ secrets.CREATE_REPO_SECRET }}
      - name: Create repository using GitHub API
        env:
          GITHUB_TOKEN: ${{ secrets.CREATE_REPO_SECRET }}
