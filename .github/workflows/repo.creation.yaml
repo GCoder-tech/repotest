@@ -23,4 +23,4 @@ jobs:
             "name": "test-workflow",
             "description": "test creation of repo through work-flow",
             "private": 'true'
-          }' https://api.github.com/GCoder-tech/
+          }' https://api.github.com/user/repos
