@@ -7,7 +7,7 @@ on:
         description: 'value streams drop down'
         required: true
         default: ''
-        type: string
+        type: choice
 
 jobs:
   build:
