@@ -15,7 +15,7 @@ jobs:
          echo "::set-output name=repo_visibility::$(echo '${{ github.event.issue.body }}' | grep 'Repository Visibility' | cut -d':' -f2 | xargs | tr '[:upper:]' '[:lower:]')"
      - name: Create repository using GitHub API
        env:
-         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+         GITHUB_TOKEN: ${{ secrets.CREATE_REPO_SECRET }}
        run: |
          curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
           -d '{
