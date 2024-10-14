@@ -3,8 +3,8 @@ name: Cascading Dropdowns Workflow
 on:
   workflow_dispatch:
     inputs:
-      dropdown1:
-        description: ''
+      value-stream-dd:
+        description: 'value streams drop down'
         required: true
         default: ''
         type: string
@@ -28,5 +28,5 @@ jobs:
       - name: Run script to set dropdown values
         run: node script.js
         env:
-          DROPDOWN_1: ${{ github.event.inputs.dropdown1 }}
+          value-stream-dd: ${{ github.event.inputs.value-stream-dd }}
 
