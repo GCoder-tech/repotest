@@ -1,0 +1,32 @@
+name: Cascading Dropdowns Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      dropdown1:
+        description: ''
+        required: true
+        default: ''
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      
+      - name: Install dependencies
+        run: npm install
+      
+      - name: Run script to set dropdown values
+        run: node script.js
+        env:
+          DROPDOWN_1: ${{ github.event.inputs.dropdown1 }}
+
