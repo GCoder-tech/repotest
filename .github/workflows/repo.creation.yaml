@@ -4,7 +4,7 @@ on:
    types: [opened]
 jobs:
  create-repo:
-   if: github.event.issue.labels.*.name contains 'repo-request'
+   if: contains(github.event.issue.labels.*.name, 'repo-request')
    runs-on: ubuntu-latest
    steps:
      - name: Extract issue data
