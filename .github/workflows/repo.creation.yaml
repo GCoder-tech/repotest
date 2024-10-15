@@ -47,5 +47,7 @@ jobs:
            }' https://api.github.com/user/repos
            
       - name: Rename default branch to master
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh api -X PATCH /repos/${{ github.repository_owner }}/${{ steps.issue-parser.outputs.issueparser_repository_name }}/branches/main/rename -F new_name=master
       
