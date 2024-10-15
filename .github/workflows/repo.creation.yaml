@@ -12,6 +12,27 @@ jobs:
       - name: Parse issue body
         uses: stefanbuck/github-issue-parser@v3
         id: issue-parser
+        
+      - name: Validate parsed result
+        id: parse
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "buc_code=---
+name: Automate Repo Creation
+on:
+  issues:
+    types:
+      - opened
+jobs:
+  create-repo:
+    #if: contains(github.event.issue.labels.*.name, 'repo-creation')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Parse issue body
+        uses: stefanbuck/github-issue-parser@v3
+        id: issue-parser
+        
       - name: Validate parsed result
         id: parse
         env:
@@ -33,6 +54,16 @@ jobs:
             echo "👷🏼‍♂️ FIS_IssueOps Error: Repository Description is required. Ticket will be closed, please create new ticket with correct info."| gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --body-file=-
             exit 1
           fi
+      - name: Add Labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['issueOps', '${{ steps.issue-parser.outputs.issueparser_buc_code }}']
+            })    
           
       - name: Create repository using GitHub API
         env:
@@ -45,9 +76,43 @@ jobs:
              "auto_init": true, 
              "private": true
            }' https://api.github.com/user/repos
-           
-      - name: Rename default branch to master
+      
+"
+          echo "repository_name=${{ steps.issue-parser.outputs.issueparser_repository_name }}"
+          echo "repo_description=$(echo "${{ steps.issue-parser.outputs.issueparser_repo_description }}" | sed 's/"/\\"/g')"
+
+          if [ -z "${{ steps.issue-parser.outputs.issueparser_buc_code }}" ]; then
+            echo "👷🏼‍♂️ FIS_IssueOps Error: BUC Code is required. Ticket will be closed, please create new ticket with correct info."| gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --body-file=-
+            exit 1
+          fi
+          if [ -z "${{ steps.issue-parser.outputs.issueparser_repository_name }}" ]; then
+            echo "👷🏼‍♂️ FIS_IssueOps Error: Repository Name is required. Ticket will be closed, please create new ticket with correct info."| gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --body-file=-
+            exit 1
+          fi
+          if [ -z "${{ steps.issue-parser.outputs.issueparser_repo_description }}" ]; then
+            echo "👷🏼‍♂️ FIS_IssueOps Error: Repository Description is required. Ticket will be closed, please create new ticket with correct info."| gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --body-file=-
+            exit 1
+          fi
+      - name: Add Labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['issueOps', ]
+            })    
+          
+      - name: Create repository using GitHub API
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh api -X PATCH /repos/${{ github.repository_owner }}/${{ steps.issue-parser.outputs.issueparser_repository_name }}/branches/main/rename -F new_name=master
+          GITHUB_TOKEN: ${{ secrets.CREATE_REPO_SECRET }}
+        run: >
+          curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
+           -d '{
+             "name": "${{ steps.issue-parser.outputs.issueparser_repository_name }}",
+             "description": "${{ steps.issue-parser.outputs.issueparser_repo_description }}",
+             "auto_init": true, 
+             "private": true
+           }' https://api.github.com/user/repos
       
