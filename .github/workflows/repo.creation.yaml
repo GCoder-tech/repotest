@@ -18,26 +18,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "buc_code=---
-name: Automate Repo Creation
-on:
-  issues:
-    types:
-      - opened
-jobs:
-  create-repo:
-    #if: contains(github.event.issue.labels.*.name, 'repo-creation')
-    runs-on: ubuntu-latest
-    steps:
-      - name: Parse issue body
-        uses: stefanbuck/github-issue-parser@v3
-        id: issue-parser
-        
-      - name: Validate parsed result
-        id: parse
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
           echo "buc_code=${{ steps.issue-parser.outputs.issueparser_buc_code }}"
           echo "repository_name=${{ steps.issue-parser.outputs.issueparser_repository_name }}"
           echo "repo_description=$(echo "${{ steps.issue-parser.outputs.issueparser_repo_description }}" | sed 's/"/\\"/g')"
