@@ -24,7 +24,7 @@ jobs:
           
       - name: Output parsed content
         run: |
-          echo "${{ steps.parse.outputs }}"
+          echo "${{ steps.parse.outputs }} | json"
           echo "Repository Name: ${{ steps.parse.outputs.repository_name }}"
           echo "Repo Description: ${{ steps.parse.outputs.repo_description }}"
           echo "Repo Visbility: ${{ steps.parse.outputs.visibility }}"
