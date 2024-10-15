@@ -35,8 +35,8 @@ jobs:
         run: >
           curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
            -d '{
-             "name": "test-creationrepo",
-             "description": "test-creationrepo",
+             "name": "demo-repocreation",
+             "description": "demo-creationrepo",
              "auto_init": true, 
              "private": true
            }' https://api.github.com/user/repos
