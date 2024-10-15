@@ -10,7 +10,7 @@ body:
 - type: dropdown
   id: buc-dd
   attributes:
-    label: BUC Code
+    label: Value Stream Key
     options:
       - DEE - 1001.510050.9976
       - DRCB - 1001.510050.9326
