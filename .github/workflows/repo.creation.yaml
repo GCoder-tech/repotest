@@ -55,16 +55,4 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{"state": "closed"}' \
             https://api.github.com/repos/${{ github.repository_owner }}/repotest/issues/${{ github.event.issue.number }}
-            
-      - name: Add labels
-        if: ${{ steps.issue-parser.outputs.issueparser_buc_code != '' }}
-        run: |
-          IFS=',' read -ra LABELS <<< "${{ steps.issue-parser.outputs.issueparser_buc_code }}"
-          for label in "${LABELS[@]}"; do
-            curl -X POST \
-              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-              -H "Content-Type: application/json" \
-              -d '{ "name": "$label", "color": "f29513"}'
-              https://api.github.com/repos/${{ github.repository_owner }}/${{ steps.issue-parser.outputs.issueparser_repository_name }}/labels
-          done
       
