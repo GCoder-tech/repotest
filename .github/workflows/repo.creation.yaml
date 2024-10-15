@@ -35,10 +35,10 @@ jobs:
         run: >
           curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
            -d '{
-             "name": "${{ steps.parse.outputs.repository_name }}",
-             "description": "${{ steps.parse.outputs.repo_description }}",
+             "name": "test-workflow-main",
+             "description": "test-workflow-main",
              "auto_init": true 
-             "private": ${{ steps.parse.outputs.visibility == 'private' }}
+             "private": true
            }' https://api.github.com/user/repos
       - name: Rename default branch to main
         run: >
