@@ -27,7 +27,7 @@ jobs:
              "name": "${{ steps.extract.outputs.repo_name }}",
              "description": "${{ steps.extract.outputs.repo_description }}",
              "auto_init": true 
-             "private": "$([[ "${{ steps.extract.outputs.repo_visibility }}" == "private" ]] && echo true || echo false)}"
+             "private": true
            }' https://api.github.com/user/repos
       - name: Rename default branch to main
         run: >
