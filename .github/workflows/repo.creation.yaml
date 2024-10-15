@@ -29,10 +29,10 @@ jobs:
              "auto_init": true 
              "private": $([[ "${{ steps.extract.outputs.repo_visibility }}" == "private" ]] && echo true || echo false)}
            }' https://api.github.com/user/repos
-      - name: Rename default branch to master
+      - name: Rename default branch to main
         run: >
           curl -X POST \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Content-Type: application/json" \
-            -d '{"new_name": "master"}' \
+            -d '{"new_name": "main"}' \
             https://api.github.com/repos/${{ github.repository_owner }}/${{ github.event.inputs.repoName }}/branches/main/rename
