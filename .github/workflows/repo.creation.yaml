@@ -1,26 +1,38 @@
-name: "Automate Repo Creation"
+---
+name: Automate Repo Creation
 on:
- issues:
-   types: [opened]
+  issues:
+    types:
+      - opened
 jobs:
- create-repo:
-   #if: contains(github.event.issue.labels.*.name, 'repo-request')
-   runs-on: ubuntu-latest
-   steps:
-     - name: Extract issue data
-       id: extract
-       run: |
-         echo "::set-output name=repo_name::$(echo '${{ github.event.issue.body }}' | grep 'Repository Name' | cut -d':' -f2 | xargs)"
-         echo "::set-output name=repo_description::$(echo '${{ github.event.issue.body }}' | grep 'Repository Description' | cut -d':' -f2 | xargs)"
-         echo "::set-output name=repo_visibility::$(echo '${{ github.event.issue.body }}' | grep 'Repository Visibility' | cut -d':' -f2 | xargs | tr '[:upper:]' '[:lower:]')"
-         echo ${{ secrets.CREATE_REPO_SECRET }}
-     - name: Create repository using GitHub API
-       env:
-         GITHUB_TOKEN: ${{ secrets.CREATE_REPO_SECRET }}
-       run: |
-         curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
-          -d '{
-            "name": "test-workflow",
-            "description": "test creation of repo through work-flow",
-            "private": 'true'
-          }' https://api.github.com/user/repos
+  create-repo:
+    if: contains(github.event.issue.labels.*.name, 'repo-creation')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract issue data
+        id: extract
+        run: >
+          echo "::set-output name=repo_name::$(echo '${{ github.event.issue.body }}'
+          | grep 'Repository Name' | cut -d':' -f2 | xargs)"
+
+          echo "::set-output name=repo_description::$(echo '${{ github.event.issue.body }}' | grep 'Repository Description' | cut -d':' -f2 | xargs)"
+
+          echo "::set-output name=repo_visibility::$(echo '${{ github.event.issue.body }}' | grep 'Repository Visibility' | cut -d':' -f2 | xargs | tr '[:upper:]' '[:lower:]')"
+      - name: Create repository using GitHub API
+        env:
+          GITHUB_TOKEN: ${{ secrets.CREATE_REPO_SECRET }}
+        run: >
+          curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
+           -d '{
+             "name": "${{ steps.extract.outputs.repo_name }}",
+             "description": "${{ steps.extract.outputs.repo_description }}",
+             "auto_init": true 
+             "private": $([[ "${{ steps.extract.outputs.repo_visibility }}" == "private" ]] && echo true || echo false)}
+           }' https://api.github.com/user/repos
+      - name: Rename default branch to master
+        run: >
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"new_name": "master"}' \
+            https://api.github.com/repos/${{ github.repository_owner }}/${{ github.event.inputs.repoName }}/branches/main/rename
