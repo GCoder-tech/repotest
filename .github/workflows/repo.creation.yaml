@@ -19,6 +19,9 @@ jobs:
           echo "repo_description=$(echo '${{ github.event.issue.body }}' | sed -n '/Repo Description/{n;p;}')" >> $GITHUB_ENV
           echo "repository_name=$(echo '${{ github.event.issue.body }}' | sed -n '/Repository Name/{n;p;}')" >> $GITHUB_ENV
           echo "visibility=$(echo '${{ github.event.issue.body }}' | sed -n '/Visibility/{n;p;}')" >> $GITHUB_ENV
+          echo "::set-output name=repo_name::$(echo '${{ github.event.issue.body }}' | grep 'Repository Name' | cut -d':' -f2 | xargs)" >> $GITHUB_ENV
+          echo "::set-output name=repo_description::$(echo '${{ github.event.issue.body }}' | grep 'Repository Description' | cut -d':' -f2 | xargs)" >> $GITHUB_ENV
+          echo "::set-output name=repo_visibility::$(echo '${{ github.event.issue.body }}' | grep 'Visibility' | cut -d':' -f2 | xargs | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
       - name: Output parsed content
         run: |
