@@ -11,26 +11,20 @@ jobs:
     steps:
       - name: Get issue content
         id: issue
-        run: |
-          echo "Issue Title: ${{ github.event.issue.title }}"
-          echo "Issue Body: ${{ github.event.issue.body }}"
+        run: echo "${{ github.event.issue.body }}"
 
-      - name: Install Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
-
-      - name: Parse issue content
-        id: parse
+      - name: Set outputs
+        id: set-outputs
         run: |
-          echo "${{ github.event.issue.body }}" > issue_body.txt
-          python parse_issue.py
+          echo "repo_description=$(echo '${{ github.event.issue.body }}' | sed -n '/\#\#\# Repo Description/{n;p;}')" >> $GITHUB_ENV
+          echo "repository_name=$(echo '${{ github.event.issue.body }}' | sed -n '/\#\#\# Repository Name/{n;p;}')" >> $GITHUB_ENV
+          echo "visibility=$(echo '${{ github.event.issue.body }}' | sed -n '/\#\#\# Visibility/{n;p;}')" >> $GITHUB_ENV
 
       - name: Output parsed content
         run: |
-          echo "Description: ${{ steps.parse.outputs.description }}"
-          echo "Use case: ${{ steps.parse.outputs.use_case }}"
-          echo "Additional context: ${{ steps.parse.outputs.additional_context }}"
+          echo "Description: ${{ env.repo_description }}"
+          echo "Use case: ${{ env.repository_name }}"
+          echo "Additional context: ${{ env.visibility }}"
           
       - name: Create repository using GitHub API
         env:
