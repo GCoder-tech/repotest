@@ -12,9 +12,7 @@ jobs:
       - name: Extract issue data
         id: extract
         run: >
-          echo "${{ github.event.inputs.repo-name }}"
-          echo "${{ github.event.inputs.repo-description }}"
-          echo ${{ github.event.inputs.visibility == 'private' && 'true' || 'false' }}
+          echo "${{ github.event.inputs }}"
       - name: Create repository using GitHub API
         env:
           GITHUB_TOKEN: ${{ secrets.CREATE_REPO_SECRET }}
