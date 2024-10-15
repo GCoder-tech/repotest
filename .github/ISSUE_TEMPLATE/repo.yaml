@@ -8,17 +8,6 @@ body:
     value: |
       This should read: "Please enter the Solution Asset ID associated with your team's [GitHub Product Code](https://wiki.fisglobal.com/display/cmtech/GHE+-+Team+Onboarding#GHETeamOnboarding-GitHubProductCode) and the name, description, BUC code to create a repository."
 - type: dropdown
-  id: value-stream-dd
-  attributes:
-    label: value stream key
-    options:
-      - DEE
-      - DRCB
-      - DLFI
-      - DBTVS
-      - BPS 
-      - DBUS
-- type: dropdown
   id: buc-dd
   attributes:
     label: BUC Code
