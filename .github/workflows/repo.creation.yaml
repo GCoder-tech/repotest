@@ -37,7 +37,7 @@ jobs:
            -d '{
              "name": "test-workflow-main",
              "description": "test-workflow-main",
-             "auto_init": true 
+             "auto_init": true, 
              "private": true
            }' https://api.github.com/user/repos
       - name: Rename default branch to main
