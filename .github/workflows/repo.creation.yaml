@@ -56,6 +56,6 @@ jobs:
               -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
               -H "Content-Type: application/json" \
               -d "{\"name\": \"$label\", \"color\": \"f29513\"}" \
-              https://api.github.com/repos/${{ github.repository_owner }}/${{ github.event.inputs.repoName }}/labels
+              https://api.github.com/repos/${{ github.repository_owner }}/${{ steps.issue-parser.outputs.issueparser_repository_name }}/labels
           done
       
