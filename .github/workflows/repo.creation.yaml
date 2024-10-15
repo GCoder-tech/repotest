@@ -9,12 +9,25 @@ jobs:
     #if: contains(github.event.issue.labels.*.name, 'repo-creation')
     runs-on: ubuntu-latest
     steps:
-      - name: Extract issue data
-        id: extract
-        run: >
-          echo "::set-output name=repo_name::$(echo '${{ github.event.issue.body }}' | grep 'repo-name' | cut -d':' -f2 | xargs)"
-          echo "::set-output name=repo_description::$(echo '${{ github.event.issue.body }}' | grep 'repo-description' | cut -d':' -f2 | xargs)"
-          echo "::set-output name=repo_visibility::$(echo '${{ github.event.issue.body }}' | grep 'visbility' | cut -d':' -f2 | xargs | tr '[:upper:]' '[:lower:]')"
+      - name: Get issue content
+        id: issue
+        run: |
+          echo "Issue Title: ${{ github.event.issue.title }}"
+          echo "Issue Body: ${{ github.event.issue.body }}"
+
+      - name: Parse issue content
+        id: parse
+        run: |
+          echo "Description: $(echo "${{ github.event.issue.body }}" | grep -A 1 'Repository Name' | tail -n 1)"
+          echo "Use case: $(echo "${{ github.event.issue.body }}" | grep -A 1 'Repository Description' | tail -n 1)"
+          echo "Additional context: $(echo "${{ github.event.issue.body }}" | grep -A 1 'Repository Visibility' | tail -n 1)"
+          
+      - name: Output parsed content
+        run: |
+          echo "Description: ${{ steps.parse.outputs.repository_name }}"
+          echo "Use case: ${{ steps.parse.outputs.repository_description }}"
+          echo "Additional context: ${{ steps.parse.outputs.report_visibility }}"
+          
       - name: Create repository using GitHub API
         env:
           GITHUB_TOKEN: ${{ secrets.CREATE_REPO_SECRET }}
