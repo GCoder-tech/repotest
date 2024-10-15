@@ -56,15 +56,17 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               labels: ['issueOps', '${{ steps.issue-parser.outputs.issueparser_buc_code }}']
-            })    
+            })
 
-      - name: Authenticate GitHub CLI
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh auth login --with-token <<< "$GH_TOKEN"
-
-      - name: Rename default branch to master
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh api -X PATCH /repos/${{ github.repository_owner }}/${{ github.event.inputs.repoName }}/branches/main/rename -F new_name=master
+      - name: Add labels
+        if: ${{ steps.issue-parser.outputs.issueparser_buc_code != '' }}
+        run: |
+          IFS=',' read -ra LABELS <<< "${{ steps.issue-parser.outputs.issueparser_buc_code }}"
+          for label in "${LABELS[@]}"; do
+            curl -X POST \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              -d "{\"name\": \"$label\", \"color\": \"f29513\"}" \
+              https://api.github.com/repos/${{ github.repository_owner }}/${{ github.event.inputs.repoName }}/labels
+          done
       
