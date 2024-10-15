@@ -45,10 +45,7 @@ jobs:
              "auto_init": true, 
              "private": true
            }' https://api.github.com/user/repos
-      - name: Rename default branch to main
-        run: >
-          curl -X POST \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{"new_name": "master"}' \
-            https://api.github.com/repos/${{ github.repository_owner }}/${{ steps.issue-parser.outputs.issueparser_repository_name }}/branches/main/rename
+           
+      - name: Rename default branch to master
+        run: gh api -X PATCH /repos/${{ github.repository_owner }}/${{ steps.issue-parser.outputs.issueparser_repository_name }}/branches/main/rename -F new_name=master
+      
