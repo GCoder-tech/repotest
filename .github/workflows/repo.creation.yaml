@@ -12,8 +12,8 @@ jobs:
       - name: Extract issue data
         id: extract
         run: >
-          echo "::set-output name=repo_name::$(echo '${{ github.event.issue.body }}' | grep 'Repository Name' | cut -d':' -f2 | xargs)"
-          echo "::set-output name=repo_description::$(echo '${{ github.event.issue.body }}' | grep 'Repository Description' | cut -d':' -f2 | xargs)"
+          echo "::set-output name=repo_name::$(echo '${{ github.event.issue.body }}' | grep 'repo-name' | cut -d':' -f2 | xargs)"
+          echo "::set-output name=repo_description::$(echo '${{ github.event.issue.body }}' | grep 'repo-description' | cut -d':' -f2 | xargs)"
           echo "::set-output name=repo_visibility::$(echo '${{ github.event.issue.body }}' | grep 'visbility' | cut -d':' -f2 | xargs | tr '[:upper:]' '[:lower:]')"
       - name: Create repository using GitHub API
         env:
