@@ -18,9 +18,9 @@ jobs:
       - name: Parse issue content
         id: parse
         run: |
-          echo "Repository NAme: $(echo "${{ github.event.issue.body }}" | grep -A 1 'Repository Name' | tail -n 1)"
-          echo "Repo Description: $(echo "${{ github.event.issue.body }}" | grep -A 1 'Repo Description' | tail -n 1)"
-          echo "Repo Visbility: $(echo "${{ github.event.issue.body }}" | grep -A 1 'Visibility' | tail -n 1)"
+          echo "Repository NAme: $(echo "${{ github.event.issue.body }}" | grep -A 1 '### Repository Name' | tail -n 1)"
+          echo "Repo Description: $(echo "${{ github.event.issue.body }}" | grep -A 1 '### Repo Description' | tail -n 1)"
+          echo "Repo Visbility: $(echo "${{ github.event.issue.body }}" | grep -A 1 '### Visibility' | tail -n 1)"
           
       - name: Output parsed content
         run: |
