@@ -18,12 +18,12 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "buc_code=${{ steps.issue-parser.outputs.issueparser_buc_code }}"
+          echo "buc_code=${{ steps.issue-parser.outputs.issueparser_value_stream_key }}"
           echo "repository_name=${{ steps.issue-parser.outputs.issueparser_repository_name }}"
           echo "repo_description=$(echo "${{ steps.issue-parser.outputs.issueparser_repo_description }}" | sed 's/"/\\"/g')"
           echo "visibility=$(echo "${{ steps.issue-parser.outputs.issueparser_visibility }}" | sed 's/"/\\"/g')"
 
-          if [ -z "${{ steps.issue-parser.outputs.issueparser_buc_code }}" ]; then
+          if [ -z "${{ steps.issue-parser.outputs.issueparser_value_stream_key }}" ]; then
             echo "👷🏼‍♂️ FIS_IssueOps Error: BUC Code is required. Ticket will be closed, please create new ticket with correct info."| gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --body-file=-
             exit 1
           fi
@@ -42,12 +42,20 @@ jobs:
         run: >
           curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
            -d '{
-             "name": "${{ steps.issue-parser.outputs.issueparser_buc_code }}${{ steps.issue-parser.outputs.issueparser_repository_name }}",
+             "name": "${{ steps.issue-parser.outputs.issueparser_value_stream_key }}${{ steps.issue-parser.outputs.issueparser_repository_name }}",
              "description": "${{ steps.issue-parser.outputs.issueparser_repo_description }}",
              "auto_init": true, 
              "private": "${{ steps.issue-parser.outputs.issueparser_visibility }} == 'private'"
            }' https://api.github.com/user/repos
-           
+
+      - name: Add admin user
+        run: |
+          curl -X PUT \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{"permission": "admin"}' \
+            https://api.github.com/repos/${{ github.repository_owner }}/${{ steps.issue-parser.outputs.issueparser_value_stream_key }}${{ steps.issue-parser.outputs.issueparser_repository_name }}/collaborators/${{ github.event.issue.user.login }}
+            
       - name: Close issue
         if: github.event.issue.state == 'open'
         run: |
