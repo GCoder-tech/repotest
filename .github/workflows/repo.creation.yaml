@@ -35,13 +35,14 @@ jobs:
             echo "👷🏼‍♂️ FIS_IssueOps Error: Repository Description is required. Ticket will be closed, please create new ticket with correct info."| gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --body-file=-
             exit 1
           fi
+          
       - name: Create repository using GitHub API
         env:
           GITHUB_TOKEN: ${{ secrets.CREATE_REPO_SECRET }}
         run: >
           curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
            -d '{
-             "name": "${{ steps.issue-parser.outputs.issueparser_repository_name }}",
+             "name": "${{ steps.issue-parser.outputs.issueparser_buc_code }}${{ steps.issue-parser.outputs.issueparser_repository_name }}",
              "description": "${{ steps.issue-parser.outputs.issueparser_repo_description }}",
              "auto_init": true, 
              "private": "${{ steps.issue-parser.outputs.issueparser_visibility }} == 'private'"
