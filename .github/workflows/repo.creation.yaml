@@ -18,13 +18,12 @@ jobs:
       - name: Parse issue content
         id: parse
         run: |
-          echo "Repository Name: $(echo "${{ github.event.issue.body }}" | grep -A 1 '### Repository Name' | tail -n 1)"
-          echo "Repo Description: $(echo "${{ github.event.issue.body }}" | grep -A 1 '### Repo Description' | tail -n 1)"
-          echo "Repo Visbility: $(echo "${{ github.event.issue.body }}" | grep -A 1 '### Visibility' | tail -n 1)"
+          repository_name = $(echo "${{ github.event.issue.body }}" | grep -A 1 '### Repository Name' | tail -n 1)"
+          repo_description = $(echo "${{ github.event.issue.body }}" | grep -A 1 '### Repo Description' | tail -n 1)"
+          visbility = $(echo "${{ github.event.issue.body }}" | grep -A 1 '### Visibility' | tail -n 1)"
           
       - name: Output parsed content
         run: |
-          echo ${{ steps.parse.outputs }}
           echo "Repository Name: ${{ steps.parse.outputs.repository_name }}"
           echo "Repo Description: ${{ steps.parse.outputs.repo_description }}"
           echo "Repo Visbility: ${{ steps.parse.outputs.visibility }}"
@@ -35,10 +34,10 @@ jobs:
         run: >
           curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
            -d '{
-             "name": "${{ steps.extract.outputs.repo_name }}",
-             "description": "${{ steps.extract.outputs.repo_description }}",
+             "name": "${{ steps.parse.outputs.repository_name }}",
+             "description": "${{ steps.parse.outputs.repo_description }}",
              "auto_init": true 
-             "private": ${{ github.event.inputs.visibility == 'private' }}
+             "private": ${{ steps.parse.outputs.visibility == 'private' }}
            }' https://api.github.com/user/repos
       - name: Rename default branch to main
         run: >
