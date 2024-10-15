@@ -9,25 +9,30 @@ jobs:
     #if: contains(github.event.issue.labels.*.name, 'repo-creation')
     runs-on: ubuntu-latest
     steps:
-      - name: Get issue content
-        id: issue
-        run: echo "${{ github.event.issue.body }}"
-
-      - name: Set outputs
-        id: set-outputs
+      - name: Parse issue body
+        uses: stefanbuck/github-issue-parser@v3
+        id: issue-parser
+      - name: Validate parsed result
+        id: parse
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "repo_description=$(echo '${{ github.event.issue.body }}' | sed -n '/Repo Description/{n;p;}')" >> $GITHUB_ENV
-          echo "repository_name=$(echo '${{ github.event.issue.body }}' | sed -n '/Repository Name/{n;p;}')" >> $GITHUB_ENV
-          echo "visibility=$(echo '${{ github.event.issue.body }}' | sed -n '/Visibility/{n;p;}')" >> $GITHUB_ENV
-          echo "::set-output name=repo_name::$(echo '${{ github.event.issue.body }}' | grep 'Repository Name' | cut -d':' -f2 | xargs)" >> $GITHUB_ENV
-          echo "::set-output name=repo_description::$(echo '${{ github.event.issue.body }}' | grep 'Repository Description' | cut -d':' -f2 | xargs)" >> $GITHUB_ENV
-          echo "::set-output name=repo_visibility::$(echo '${{ github.event.issue.body }}' | grep 'Visibility' | cut -d':' -f2 | xargs | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+          echo "buc_code=${{ steps.issue-parser.outputs.issueparser_buc_code }}"
+          echo "repository_name=${{ steps.issue-parser.outputs.issueparser_repository_name }}"
+          echo "repo_description=$(echo "${{ steps.issue-parser.outputs.issueparser_repo_description }}" | sed 's/"/\\"/g')"
 
-      - name: Output parsed content
-        run: |
-          echo "Description: ${{ env.repo_description }}"
-          echo "Use case: ${{ env.repository_name }}"
-          echo "Additional context: ${{ env.visibility }}"
+          if [ -z "${{ steps.issue-parser.outputs.issueparser_buc_code }}" ]; then
+            echo "👷🏼‍♂️ FIS_IssueOps Error: BUC Code is required. Ticket will be closed, please create new ticket with correct info."| gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --body-file=-
+            exit 1
+          fi
+          if [ -z "${{ steps.issue-parser.outputs.issueparser_repository_name }}" ]; then
+            echo "👷🏼‍♂️ FIS_IssueOps Error: Repository Name is required. Ticket will be closed, please create new ticket with correct info."| gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --body-file=-
+            exit 1
+          fi
+          if [ -z "${{ steps.issue-parser.outputs.issueparser_repo_description }}" ]; then
+            echo "👷🏼‍♂️ FIS_IssueOps Error: Repository Description is required. Ticket will be closed, please create new ticket with correct info."| gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --body-file=-
+            exit 1
+          fi
           
       - name: Create repository using GitHub API
         env:
@@ -35,8 +40,8 @@ jobs:
         run: >
           curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
            -d '{
-             "name": "demo-repocreation",
-             "description": "demo-creationrepo",
+             "name": "${{ steps.issue-parser.outputs.issueparser_repository_name }}",
+             "description": "${{ steps.issue-parser.outputs.issueparser_repo_description }}",
              "auto_init": true, 
              "private": true
            }' https://api.github.com/user/repos
@@ -45,5 +50,5 @@ jobs:
           curl -X POST \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Content-Type: application/json" \
-            -d '{"new_name": "main"}' \
+            -d '{"new_name": "master"}' \
             https://api.github.com/repos/${{ github.repository_owner }}/${{ github.event.inputs.repoName }}/branches/main/rename
