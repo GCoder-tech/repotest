@@ -51,4 +51,4 @@ jobs:
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d '{"new_name": "master"}' \
-            https://api.github.com/repos/${{ github.repository_owner }}/${{ github.event.inputs.repoName }}/branches/main/rename
+            https://api.github.com/repos/${{ github.repository_owner }}/${{ github.event.inputs.repoName }}branches/main/rename
