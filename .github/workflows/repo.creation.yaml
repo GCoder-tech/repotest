@@ -42,7 +42,7 @@ jobs:
         run: >
           curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
            -d '{
-             "name": "${{ steps.issue-parser.outputs.issueparser_value_stream_key }}-${{ steps.issue-parser.outputs.issueparser_repository_name }}",
+             "name": "${{ steps.issue-parser.outputs.issueparser_value_stream_key }} | cut -d'-' -f1 | tr '[:upper:]' '[:lower:]'-${{ steps.issue-parser.outputs.issueparser_repository_name }}",
              "description": "${{ steps.issue-parser.outputs.issueparser_repo_description }}",
              "auto_init": true, 
              "private": "${{ steps.issue-parser.outputs.issueparser_visibility }} == 'private'"
