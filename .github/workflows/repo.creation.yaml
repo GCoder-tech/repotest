@@ -36,13 +36,23 @@ jobs:
             exit 1
           fi
           
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Convert string to lowercase
+        id: convert
+        run: |
+          INPUT_STRING="YOUR_INPUT_STRING"
+          LOWERCASE_STRING=$(echo "${{ steps.issue-parser.outputs.issueparser_value_stream_key }}" | tr '[:upper:]' '[:lower:]')
+          echo "::set-output name=lowercase::$LOWERCASE_STRING"
+          
       - name: Create repository using GitHub API
         env:
           GITHUB_TOKEN: ${{ secrets.CREATE_REPO_SECRET }}
         run: >
           curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
            -d '{
-             "name": "${{ steps.issue-parser.outputs.issueparser_value_stream_key }} | cut -d'-' -f1 | tr '[:upper:]' '[:lower:]'-${{ steps.issue-parser.outputs.issueparser_repository_name }}",
+             "name": "${{ steps.convert.outputs.lowercase }}-${{ steps.issue-parser.outputs.issueparser_repository_name }}",
              "description": "${{ steps.issue-parser.outputs.issueparser_repo_description }}",
              "auto_init": true, 
              "private": "${{ steps.issue-parser.outputs.issueparser_visibility }} == 'private'"
