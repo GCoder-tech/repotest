@@ -1,110 +1,114 @@
 ---
-name: Automate Repo Creation
-on:
-  issues:
-    types:
-      - opened
-jobs:
-  create-repo:
-    #if: contains(github.event.issue.labels.*.name, 'repo-creation')
-    runs-on: ubuntu-latest
-    steps:
-      - name: Parse issue body
-        uses: stefanbuck/github-issue-parser@v3
-        id: issue-parser
+  name: Automate Repo Creation
+  on:
+    issues:
+      types:
+        - opened
+  jobs:
+    create-repo:
+      #if: contains(github.event.issue.labels.*.name, 'repo-creation')
+      runs-on: ubuntu-latest
+      steps:
+        - name: Parse issue body
+          uses: stefanbuck/github-issue-parser@v3
+          id: issue-parser
+          
+        - name: Validate parsed result
+          id: parse
+          env:
+            GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          run: |
+            echo "buc_code=${{ steps.issue-parser.outputs.issueparser_value_stream_key }}"
+            echo "repository_name=${{ steps.issue-parser.outputs.issueparser_repository_name }}"
+            echo "repo_description=$(echo "${{ steps.issue-parser.outputs.issueparser_repo_description }}" | sed 's/"/\\"/g')"
+            echo "visibility=$(echo "${{ steps.issue-parser.outputs.issueparser_visibility }}" | sed 's/"/\\"/g')"
+  
+            if [ -z "${{ steps.issue-parser.outputs.issueparser_value_stream_key }}" ]; then
+              echo "👷🏼‍♂️ FIS_IssueOps Error: BUC Code is required. Ticket will be closed, please create new ticket with correct info."| gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --body-file=-
+              exit 1
+            fi
+            if [ -z "${{ steps.issue-parser.outputs.issueparser_repository_name }}" ]; then
+              echo "👷🏼‍♂️ FIS_IssueOps Error: Repository Name is required. Ticket will be closed, please create new ticket with correct info."| gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --body-file=-
+              exit 1
+            fi
+            if [ -z "${{ steps.issue-parser.outputs.issueparser_repo_description }}" ]; then
+              echo "👷🏼‍♂️ FIS_IssueOps Error: Repository Description is required. Ticket will be closed, please create new ticket with correct info."| gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --body-file=-
+              exit 1
+            fi
+            
+        - name: Checkout repository
+          uses: actions/checkout@v2
+  
+        - name: Convert string to lowercase
+          id: convert
+          run: |
+            INPUT_STRING="YOUR_INPUT_STRING"
+            LOWERCASE_STRING=$(echo "${{ steps.issue-parser.outputs.issueparser_value_stream_key }}-${{ steps.issue-parser.outputs.issueparser_repository_name }}" | tr '[:upper:]' '[:lower:]')
+            echo "::set-output name=lowercase::$LOWERCASE_STRING"
+  
+        - name: Set key-value pairs
+          id: set-pairs
+          run: |
+            echo "::set-output name=DEE::1001.510050.9976"
+            echo "::set-output name=DRCB::1001.510050.9326"
+            echo "::set-output name=DLFI::3002.510050.9722"
+            echo "::set-output name=DBTVS::1001.510050.9775"
+            echo "::set-output name=BPS::1001.510050.9770"
+            echo "::set-output name=DBUS::3801.510050.9975"
+  
+            
+        - name: Create repository using GitHub API
+          env:
+            GITHUB_TOKEN: ${{ secrets.CREATE_REPO_SECRET }}
+          run: >
+            curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
+             -d '{
+               "name": "${{ steps.convert.outputs.lowercase }}",
+               "description": "${{ steps.issue-parser.outputs.issueparser_repo_description }}",
+               "auto_init": true, 
+               "private": "${{ steps.issue-parser.outputs.issueparser_visibility }} == 'private'"
+             }' https://api.github.com/user/repos
+  
+    post-create:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Add admin user
+          run: |
+            curl -X PUT \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              -d '{"permission": "admin"}' \
+              https://api.github.com/repos/${{ github.repository_owner }}/${{ steps.issue-parser.outputs.issueparser_value_stream_key }}${{ steps.issue-parser.outputs.issueparser_repository_name }}/collaborators/${{ github.event.issue.user.login }}
+  
+        - name: Set custom property
+          run: |
+            curl -L \
+              -X PATCH \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              -d '{"properties": [{"property_name":"BUC","value":"${{steps.set-pairs.outputs[steps.issue-parser.outputs.issueparser_value_stream_key]}}"}] }' \
+              "https://api.github.com/repos/${{ github.repository_owner }}/${{ steps.convert.outputs.lowercase }}/properties/values"
+  
+        - uses: actions/github-script@v7
+          name: Comment on success
+          id: comment_success          
+          with:
+            script: |
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: '👷🏼‍♂️ FIS_IssueOps: Repo (${{ steps.convert.outputs.lowercase }}) has been created! \n https://github.com/${{ github.event.issue.user.login }}/${{ steps.convert.outputs.lowercase }}'
+              })
+  
+        - name: Close issue
+          if: github.event.issue.state == 'open'
+          run: |
+            curl -X PATCH \
+              -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              -d '{"state": "closed"}' \
+              https://api.github.com/repos/${{ github.repository_owner }}/repotest/issues/${{ github.event.issue.number }}
         
-      - name: Validate parsed result
-        id: parse
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "buc_code=${{ steps.issue-parser.outputs.issueparser_value_stream_key }}"
-          echo "repository_name=${{ steps.issue-parser.outputs.issueparser_repository_name }}"
-          echo "repo_description=$(echo "${{ steps.issue-parser.outputs.issueparser_repo_description }}" | sed 's/"/\\"/g')"
-          echo "visibility=$(echo "${{ steps.issue-parser.outputs.issueparser_visibility }}" | sed 's/"/\\"/g')"
-
-          if [ -z "${{ steps.issue-parser.outputs.issueparser_value_stream_key }}" ]; then
-            echo "👷🏼‍♂️ FIS_IssueOps Error: BUC Code is required. Ticket will be closed, please create new ticket with correct info."| gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --body-file=-
-            exit 1
-          fi
-          if [ -z "${{ steps.issue-parser.outputs.issueparser_repository_name }}" ]; then
-            echo "👷🏼‍♂️ FIS_IssueOps Error: Repository Name is required. Ticket will be closed, please create new ticket with correct info."| gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --body-file=-
-            exit 1
-          fi
-          if [ -z "${{ steps.issue-parser.outputs.issueparser_repo_description }}" ]; then
-            echo "👷🏼‍♂️ FIS_IssueOps Error: Repository Description is required. Ticket will be closed, please create new ticket with correct info."| gh issue comment ${{ github.event.issue.number }} --repo ${{ github.repository }} --body-file=-
-            exit 1
-          fi
-          
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Convert string to lowercase
-        id: convert
-        run: |
-          INPUT_STRING="YOUR_INPUT_STRING"
-          LOWERCASE_STRING=$(echo "${{ steps.issue-parser.outputs.issueparser_value_stream_key }}-${{ steps.issue-parser.outputs.issueparser_repository_name }}" | tr '[:upper:]' '[:lower:]')
-          echo "::set-output name=lowercase::$LOWERCASE_STRING"
-
-      - name: Set key-value pairs
-        id: set-pairs
-        run: |
-          echo "::set-output name=DEE::1001.510050.9976"
-          echo "::set-output name=DRCB::1001.510050.9326"
-          echo "::set-output name=DLFI::3002.510050.9722"
-          echo "::set-output name=DBTVS::1001.510050.9775"
-          echo "::set-output name=BPS::1001.510050.9770"
-          echo "::set-output name=DBUS::3801.510050.9975"
-
-          
-      - name: Create repository using GitHub API
-        env:
-          GITHUB_TOKEN: ${{ secrets.CREATE_REPO_SECRET }}
-        run: >
-          curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
-           -d '{
-             "name": "${{ steps.convert.outputs.lowercase }}",
-             "description": "${{ steps.issue-parser.outputs.issueparser_repo_description }}",
-             "auto_init": true, 
-             "private": "${{ steps.issue-parser.outputs.issueparser_visibility }} == 'private'"
-           }' https://api.github.com/user/repos
-
-      - name: Add admin user
-        run: |
-          curl -X PUT \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{"permission": "admin"}' \
-            https://api.github.com/repos/${{ github.repository_owner }}/${{ steps.issue-parser.outputs.issueparser_value_stream_key }}${{ steps.issue-parser.outputs.issueparser_repository_name }}/collaborators/${{ github.event.issue.user.login }}
-
-      - name: Set custom property
-        run: |
-          curl -L \
-            -X PATCH \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -d '{"properties": [{"property_name":"BUC","value":"${{steps.set-pairs.outputs[steps.issue-parser.outputs.issueparser_value_stream_key]}}"}] }' \
-            "https://api.github.com/repos/${{ github.repository_owner }}/${{ steps.convert.outputs.lowercase }}/properties/values"
-
-      - uses: actions/github-script@v7
-        name: Comment on success
-        id: comment_success
-        if: steps.createRepo.outcome == 'success'
-        with:
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: '👷🏼‍♂️ FIS_IssueOps: Repo (${{ steps.convert.outputs.lowercase }}) has been created! \n https://github.com/${{ github.event.issue.user.login }}/${{ steps.convert.outputs.lowercase }}'
-            })
-
-      - name: Close issue
-        if: github.event.issue.state == 'open'
-        run: |
-          curl -X PATCH \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{"state": "closed"}' \
-            https://api.github.com/repos/${{ github.repository_owner }}/repotest/issues/${{ github.event.issue.number }}
-      
+  
