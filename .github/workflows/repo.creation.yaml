@@ -77,21 +77,13 @@ jobs:
             -d '{"permission": "admin"}' \
             https://api.github.com/repos/${{ github.repository_owner }}/${{ steps.issue-parser.outputs.issueparser_value_stream_key }}${{ steps.issue-parser.outputs.issueparser_repository_name }}/collaborators/${{ github.event.issue.user.login }}
 
-      - uses: actions/github-script@v7
-        name: Add Custom Properties
-        with:
-          github-token: ${{ secrets.CREATE_REPO_SECRET }}
-          script: |
-            github.rest.repos.createOrUpdateCustomPropertiesValues({
-              owner: context.repo.owner,
-              repo: '${{ steps.convert.outputs.lowercase }}',
-              properties: [
-                {
-                  property_name: 'BUC',
-                  value: '${{ steps.set-pairs.outputs[steps.issue-parser.outputs.issueparser_value_stream_key] }}'
-                }
-              ]
-            })
+      - name: Set custom property
+        run: |
+          curl -X PUT \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -d '{"key": "BUC", "value": " ${{ steps.set-pairs.outputs[steps.issue-parser.outputs.issueparser_value_stream_key] }} "}' \
+            "https://api.github.com/repos/${{ github.repository_owner }}/${{ steps.convert.outputs.lowercase }}/custom-properties"
 
       - uses: actions/github-script@v7
         name: Comment on success
