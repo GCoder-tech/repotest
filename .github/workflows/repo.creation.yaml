@@ -91,13 +91,6 @@
               -H "X-GitHub-Api-Version: 2022-11-28" \
               -d '{"properties": [{"property_name":"BUC","value":"${{steps.set-pairs.outputs[steps.issue-parser.outputs.issueparser_value_stream_key]}}"}] }' \
               "https://api.github.com/repos/${{ github.repository_owner }}/${{ steps.convert.outputs.lowercase }}/properties/values"
-
-            gh api \
-              --method PATCH \
-              -H "Accept: application/vnd.github+json" \
-              -H "X-GitHub-Api-Version: 2022-11-28" \
-              /repos/${{ github.repository_owner }}/${{ steps.convert.outputs.lowercase }}/properties/values \
-              -f "properties[][property_name]=BUC" -f "properties[][value]=${{steps.set-pairs.outputs[steps.issue-parser.outputs.issueparser_value_stream_key]}}"
   
         - uses: actions/github-script@v7
           if: steps.createRepo.outcome == 'success'
