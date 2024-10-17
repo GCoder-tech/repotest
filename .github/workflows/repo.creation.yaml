@@ -72,6 +72,8 @@
   
   
         - name: Add admin user
+          env:
+            GITHUB_TOKEN: ${{ secrets.CREATE_REPO_SECRET }}
           run: |
             curl -X PUT \
               -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
@@ -82,7 +84,7 @@
         - name: Set custom property
           if: steps.createRepo.outcome == 'success'
           env:
-            GH_TOKEN: ${{ secrets.CREATE_REPO_SECRET }}
+            GITHUB_TOKEN: ${{ secrets.CREATE_REPO_SECRET }}
           run: |
             curl -L \
               -X PATCH \
