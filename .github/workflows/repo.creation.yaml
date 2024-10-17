@@ -81,6 +81,8 @@
   
         - name: Set custom property
           if: steps.createRepo.outcome == 'success'
+          env:
+            GH_TOKEN: ${{ secrets.CREATE_REPO_SECRET }}
           run: |
             curl -L \
               -X PATCH \
