@@ -43,8 +43,19 @@ jobs:
         id: convert
         run: |
           INPUT_STRING="YOUR_INPUT_STRING"
-          LOWERCASE_STRING=$(echo "${{ steps.issue-parser.outputs.issueparser_value_stream_key }}" | tr '[:upper:]' '[:lower:]')
+          LOWERCASE_STRING=$(echo "${{ steps.issue-parser.outputs.issueparser_value_stream_key }}-${{ steps.issue-parser.outputs.issueparser_repository_name }}" | tr '[:upper:]' '[:lower:]')
           echo "::set-output name=lowercase::$LOWERCASE_STRING"
+
+      - name: Set key-value pairs
+        id: set-pairs
+        run: |
+          echo "::set-output name=DEE::1001.510050.9976"
+          echo "::set-output name=DRCB::1001.510050.9326"
+          echo "::set-output name=DLFI::3002.510050.9722"
+          echo "::set-output name=DBTVS::1001.510050.9775"
+          echo "::set-output name=BPS::1001.510050.9770"
+          echo "::set-output name=DBUS::3801.510050.9975"
+
           
       - name: Create repository using GitHub API
         env:
@@ -52,7 +63,7 @@ jobs:
         run: >
           curl -X POST -H "Authorization: token $GITHUB_TOKEN" \
            -d '{
-             "name": "${{ steps.convert.outputs.lowercase }}-${{ steps.issue-parser.outputs.issueparser_repository_name }}",
+             "name": "${{ steps.convert.outputs.lowercase }}",
              "description": "${{ steps.issue-parser.outputs.issueparser_repo_description }}",
              "auto_init": true, 
              "private": "${{ steps.issue-parser.outputs.issueparser_visibility }} == 'private'"
@@ -65,7 +76,36 @@ jobs:
             -H "Content-Type: application/json" \
             -d '{"permission": "admin"}' \
             https://api.github.com/repos/${{ github.repository_owner }}/${{ steps.issue-parser.outputs.issueparser_value_stream_key }}${{ steps.issue-parser.outputs.issueparser_repository_name }}/collaborators/${{ github.event.issue.user.login }}
-            
+
+      - uses: actions/github-script@v7
+        name: Add Custom Properties
+        with:
+          github-token: ${{ secrets.CREATE_REPO_SECRET }}
+          script: |
+            github.rest.repos.createOrUpdateCustomPropertiesValues({
+              owner: context.repo.owner,
+              repo: '${{ steps.convert.outputs.lowercase }}',
+              properties: [
+                {
+                  property_name: 'BUC',
+                  value: '${{ steps.set-pairs.outputs[steps.issue-parser.outputs.issueparser_value_stream_key] }}'
+                }
+              ]
+            })
+
+      - uses: actions/github-script@v7
+        name: Comment on success
+        id: comment_success
+        if: steps.createRepo.outcome == 'success'
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '👷🏼‍♂️ FIS_IssueOps: Repo (${{ steps.convert.outputs.lowercase }}) has been created! \n https://github.com/${{ github.event.issue.user.login }}/${{ steps.convert.outputs.lowercase }}'
+            })
+
       - name: Close issue
         if: github.event.issue.state == 'open'
         run: |
