@@ -79,7 +79,8 @@ jobs:
 
       - name: Set custom property
         run: |
-          curl -X PUT \
+          curl -L \
+            -X PATCH \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -d '{"properties": [{"property_name":"BUC","value":"${{steps.set-pairs.outputs[steps.issue-parser.outputs.issueparser_value_stream_key]}}"}] }' \
