@@ -1,9 +1,9 @@
 ---
   name: Automate Repo Creation
   on:
-    issues:
-      types:
-        - opened
+    push:
+      branches:
+      - main
   jobs:
     create-repo:
       #if: contains(github.event.issue.labels.*.name, 'repo-creation')
